@@ -106,7 +106,7 @@ export default function BookResource() {
       );
 
       const response = await fetch(
-        "http://localhost:5000/api/bookings",
+        "https://campusflow-s065.onrender.com",
         {
           method: "POST",
 
