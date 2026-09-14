@@ -1,393 +1,418 @@
-import React, { useState } from "react";
-import { User, ShieldCheck, Lock, Mail, ArrowRight, X } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onLogin, onClose }) {
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  GraduationCap,
+  AlertCircle,
+} from "lucide-react";
+
+function Login() {
+  const navigate = useNavigate();
+
   const [role, setRole] = useState("student");
+
   const [name, setName] = useState("");
+
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
 
-  // Demo Admin Password
-  const ADMIN_PASSWORD = "campusflow123";
+
+  // ==========================================
+  // LOGIN FUNCTION
+  // ==========================================
 
   const handleLogin = (e) => {
     e.preventDefault();
+
     setError("");
 
-    // STUDENT LOGIN
-    if (role === "student") {
-      if (!name.trim() || !email.trim()) {
-        setError("Please enter your name and email.");
-        return;
-      }
 
-      onLogin({
-        name: name,
-        email: email,
-        role: "student",
-      });
+    // ==========================================
+    // CHECK NAME
+    // ==========================================
+
+    if (!name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
+
+
+    // ==========================================
+    // ADMIN PASSWORD CHECK
+    // ==========================================
+
+    if (
+      role === "admin" &&
+      password !== "campusflow123"
+    ) {
+      setError(
+        "Incorrect admin password. Please try again."
+      );
 
       return;
     }
 
-    // ADMIN LOGIN
+
+    // ==========================================
+    // CREATE LOGGED-IN USER
+    // ==========================================
+
+    const user = {
+      name: name.trim(),
+      email: email.trim(),
+      role: role,
+    };
+
+
+    // ==========================================
+    // SAVE CURRENT USER
+    // ==========================================
+
+    localStorage.setItem(
+      "campusflowUser",
+      JSON.stringify(user)
+    );
+
+
+    // ==========================================
+    // NAVIGATE BASED ON ROLE
+    // ==========================================
+
     if (role === "admin") {
-      if (!name.trim() || !email.trim() || !password.trim()) {
-        setError("Please fill all admin login details.");
-        return;
-      }
-
-      if (password !== ADMIN_PASSWORD) {
-        setError("Incorrect admin password!");
-        return;
-      }
-
-      onLogin({
-        name: name,
-        email: email,
-        role: "admin",
-      });
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
     }
   };
 
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top right, rgba(124,58,237,0.25), transparent 30%), radial-gradient(circle at bottom left, rgba(34,211,238,0.15), transparent 30%), #080B16",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "20px",
-      }}
-    >
-      <div
-        className="glass-card"
-        style={{
-          width: "100%",
-          maxWidth: "480px",
-          padding: "40px",
-          position: "relative",
-        }}
-      >
-        {/* Close Button */}
-        {onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              position: "absolute",
-              right: "18px",
-              top: "18px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid var(--border-subtle)",
-              color: "white",
-              width: "36px",
-              height: "36px",
-              borderRadius: "10px",
-              cursor: "pointer",
-            }}
-          >
-            <X size={18} />
-          </button>
-        )}
 
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <div
-            style={{
-              width: "65px",
-              height: "65px",
-              margin: "0 auto 16px",
-              borderRadius: "18px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              background:
-                "linear-gradient(135deg, var(--purple-primary), var(--cyan-electric))",
-              boxShadow: "0 0 30px rgba(124,58,237,0.4)",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "26px",
-                fontWeight: "900",
-                color: "white",
-              }}
-            >
-              CF
-            </span>
+  return (
+
+    <div className="login-page">
+
+
+      {/* ======================================
+          LEFT SIDE
+      ====================================== */}
+
+      <div className="login-left">
+
+
+        {/* BRAND */}
+
+        <div className="login-brand">
+
+          <div className="logo-icon">
+            <Building2 size={28} />
           </div>
 
-          <h1 style={{ fontSize: "2rem", marginBottom: "8px" }}>
-            Welcome to{" "}
-            <span className="gradient-text-purple-cyan">CampusFlow</span>
+          <h2>
+            Campus<span>Flow</span>
+          </h2>
+
+        </div>
+
+
+        {/* HERO */}
+
+        <div className="login-hero">
+
+
+          <div className="hero-badge">
+
+            <Sparkles size={16} />
+
+            SMART CAMPUS MANAGEMENT
+
+          </div>
+
+
+          <h1>
+
+            Your Campus.
+
+            <br />
+
+            <span>
+              Better Organized.
+            </span>
+
           </h1>
 
-          <p style={{ color: "var(--text-muted)" }}>
-            Sign in to manage campus resources smarter.
+
+          <p>
+
+            Discover available resources, avoid booking
+            conflicts and manage your campus smarter with
+            CampusFlow.
+
           </p>
+
+
+          <div className="login-feature-list">
+
+
+            <div>
+
+              <ShieldCheck />
+
+              <span>
+                Secure Resource Booking
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <GraduationCap />
+
+              <span>
+                Built for Students & Faculty
+              </span>
+
+            </div>
+
+
+          </div>
+
+
         </div>
 
-        {/* Role Selector */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-            marginBottom: "25px",
-          }}
+      </div>
+
+
+
+      {/* ======================================
+          RIGHT SIDE
+      ====================================== */}
+
+      <div className="login-right">
+
+
+        <form
+          className="login-card"
+          onSubmit={handleLogin}
         >
-          {/* Student */}
-          <button
-            type="button"
-            onClick={() => {
-              setRole("student");
-              setError("");
-            }}
-            style={{
-              padding: "16px",
-              borderRadius: "14px",
-              cursor: "pointer",
-              border:
+
+
+          <span className="small-title">
+            WELCOME BACK
+          </span>
+
+
+          <h2>
+            Sign in to CampusFlow
+          </h2>
+
+
+          <p>
+            Access your smart campus resource dashboard.
+          </p>
+
+
+
+          {/* ==================================
+              ROLE SWITCH
+          ================================== */}
+
+          <div className="role-switch">
+
+
+            <button
+              type="button"
+              className={
                 role === "student"
-                  ? "1px solid var(--cyan-electric)"
-                  : "1px solid var(--border-subtle)",
-              background:
-                role === "student"
-                  ? "rgba(34,211,238,0.12)"
-                  : "rgba(255,255,255,0.03)",
-              color: "white",
-            }}
-          >
-            <User
-              size={24}
-              color={
-                role === "student"
-                  ? "var(--cyan-electric)"
-                  : "var(--text-muted)"
+                  ? "active"
+                  : ""
               }
-            />
-
-            <div style={{ marginTop: "8px", fontWeight: "700" }}>
-              Student / Faculty
-            </div>
-          </button>
-
-          {/* Admin */}
-          <button
-            type="button"
-            onClick={() => {
-              setRole("admin");
-              setError("");
-            }}
-            style={{
-              padding: "16px",
-              borderRadius: "14px",
-              cursor: "pointer",
-              border:
-                role === "admin"
-                  ? "1px solid var(--purple-bright)"
-                  : "1px solid var(--border-subtle)",
-              background:
-                role === "admin"
-                  ? "rgba(168,85,247,0.12)"
-                  : "rgba(255,255,255,0.03)",
-              color: "white",
-            }}
-          >
-            <ShieldCheck
-              size={24}
-              color={
-                role === "admin"
-                  ? "var(--purple-bright)"
-                  : "var(--text-muted)"
-              }
-            />
-
-            <div style={{ marginTop: "8px", fontWeight: "700" }}>
-              Administrator
-            </div>
-          </button>
-        </div>
-
-        {/* Login Form */}
-        <form onSubmit={handleLogin}>
-          {/* Name */}
-          <div style={{ marginBottom: "16px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                color: "var(--text-muted)",
+              onClick={() => {
+                setRole("student");
+                setError("");
               }}
             >
-              Full Name
-            </label>
+              Student
+            </button>
 
-            <div style={{ position: "relative" }}>
-              <User
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "14px",
-                  color: "var(--text-muted)",
-                }}
-              />
 
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "14px 14px 14px 45px",
-                  borderRadius: "10px",
-                  border: "1px solid var(--border-subtle)",
-                  background: "rgba(255,255,255,0.04)",
-                  color: "white",
-                  outline: "none",
-                }}
-              />
-            </div>
+            <button
+              type="button"
+              className={
+                role === "admin"
+                  ? "active"
+                  : ""
+              }
+              onClick={() => {
+                setRole("admin");
+                setError("");
+              }}
+            >
+              Admin
+            </button>
+
+
           </div>
 
-          {/* Email */}
-          <div style={{ marginBottom: "16px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                color: "var(--text-muted)",
-              }}
-            >
-              Email Address
-            </label>
 
-            <div style={{ position: "relative" }}>
-              <Mail
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "14px",
-                  color: "var(--text-muted)",
-                }}
-              />
 
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "14px 14px 14px 45px",
-                  borderRadius: "10px",
-                  border: "1px solid var(--border-subtle)",
-                  background: "rgba(255,255,255,0.04)",
-                  color: "white",
-                  outline: "none",
-                }}
-              />
-            </div>
+          {/* ==================================
+              NAME
+          ================================== */}
+
+          <label>
+            Full Name
+          </label>
+
+
+          <div className="login-input">
+
+            <User size={18} />
+
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={name}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
+              required
+            />
+
           </div>
 
-          {/* Password - ONLY ADMIN */}
-          {role === "admin" && (
-            <div style={{ marginBottom: "16px" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  color: "var(--text-muted)",
-                }}
-              >
-                Admin Password
-              </label>
 
-              <div style={{ position: "relative" }}>
-                <Lock
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    top: "14px",
-                    color: "var(--text-muted)",
-                  }}
-                />
 
-                <input
-                  type="password"
-                  placeholder="Enter admin password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "14px 14px 14px 45px",
-                    borderRadius: "10px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "rgba(255,255,255,0.04)",
-                    color: "white",
-                    outline: "none",
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          {/* ==================================
+              EMAIL
+          ================================== */}
 
-          {/* Error */}
-          {error && (
-            <div
-              style={{
-                background: "rgba(236,72,153,0.12)",
-                border: "1px solid rgba(236,72,153,0.35)",
-                color: "#F472B6",
-                padding: "12px",
-                borderRadius: "10px",
-                marginBottom: "18px",
-                textAlign: "center",
-              }}
-            >
-              ⚠️ {error}
-            </div>
-          )}
+          <label>
+            Email Address
+          </label>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="btn-gradient"
-            style={{
-              width: "100%",
-              justifyContent: "center",
-              padding: "15px",
-              fontSize: "1rem",
-            }}
-          >
+
+          <div className="login-input">
+
+            <Mail size={18} />
+
+            <input
+              type="email"
+              placeholder="you@college.edu"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              required
+            />
+
+          </div>
+
+
+
+          {/* ==================================
+              PASSWORD
+          ================================== */}
+
+          <label>
+
             {role === "admin"
-              ? "Secure Admin Login"
-              : "Sign In to CampusFlow"}
+              ? "Admin Password"
+              : "Password"}
 
-            <ArrowRight size={18} />
+          </label>
+
+
+          <div className="login-input">
+
+            <Lock size={18} />
+
+            <input
+              type="password"
+              placeholder={
+                role === "admin"
+                  ? "Enter admin password"
+                  : "Enter your password"
+              }
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              required
+            />
+
+          </div>
+
+
+
+          {/* ==================================
+              ERROR MESSAGE
+          ================================== */}
+
+          {error && (
+
+            <div className="login-error">
+
+              <AlertCircle size={18} />
+
+              <span>
+                {error}
+              </span>
+
+            </div>
+
+          )}
+
+
+
+          {/* ==================================
+              LOGIN BUTTON
+          ================================== */}
+
+          <button
+            className="login-btn"
+            type="submit"
+          >
+
+            Continue to CampusFlow
+
+            <ArrowRight size={19} />
+
           </button>
+
+
+
+          {/* ==================================
+              DEMO TEXT
+          ================================== */}
+
+          <p className="demo-text">
+
+            {role === "admin"
+              ? "Admin access requires a valid password."
+              : "Enter your details to access CampusFlow."}
+
+          </p>
+
+
         </form>
 
-        {role === "admin" && (
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "18px",
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-            }}
-          >
-            🔐 Secure access for authorized administrators only
-          </p>
-        )}
+
       </div>
+
+
     </div>
+
   );
 }
+
+export default Login;

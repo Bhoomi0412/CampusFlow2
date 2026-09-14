@@ -1,0 +1,124 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap");
+
+:root {
+  --bg: #f7f6f0;
+  --bg-soft: #eef1e9;
+
+  --white: #ffffff;
+  --cream: #fdfbf7;
+
+  --primary: #52796f;
+  --primary-dark: #354f52;
+  --primary-light: #cad2c5;
+
+  --accent: #e07a5f;
+  --accent-dark: #c9634a;
+  --accent-light: #f8ddd4;
+
+  --yellow: #f2cc8f;
+  --yellow-light: #fff3d8;
+
+  --success: #6f9b7a;
+  --success-light: #e1efe3;
+
+  --danger: #d96c5f;
+  --danger-light: #fae1dc;
+
+  --info: #7da6a1;
+  --info-light: #e0ece9;
+
+  --text: #263238;
+  --text-secondary: #65706d;
+  --muted: #98a19f;
+
+  --border: #e1e5dd;
+
+  --shadow-sm: 0 4px 15px rgba(45, 62, 55, 0.06);
+  --shadow-md: 0 12px 30px rgba(45, 62, 55, 0.1);
+  --shadow-lg: 0 25px 60px rgba(45, 62, 55, 0.14);
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+
+  --font-main: "DM Sans", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: var(--white);
+  color: var(--text);
+  font-size: 14px;
+  transition: 0.25s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(82, 121, 111, 0.1);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

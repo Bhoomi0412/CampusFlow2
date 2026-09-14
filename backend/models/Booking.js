@@ -1,22 +1,15 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
     resource: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Resource",
-      required: true,
-    },
-
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    resourceName: {
       type: String,
       required: true,
+    },
+
+    location: {
+      type: String,
+      default: "",
     },
 
     date: {
@@ -36,18 +29,47 @@ const bookingSchema = new mongoose.Schema(
 
     purpose: {
       type: String,
-      required: true,
+      default: "",
     },
 
-    location: {
+    capacity: {
+      type: Number,
+      default: 0,
+    },
+
+    facilities: {
+      type: [String],
+      default: [],
+    },
+
+    additionalItems: {
+      type: [
+        {
+          name: String,
+          quantity: Number,
+          returned: {
+            type: Boolean,
+            default: false,
+          },
+        },
+      ],
+      default: [],
+    },
+
+    returnDeadline: {
       type: String,
-      required: true,
+      default: "",
     },
 
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING",
+      enum: ["pending", "approved", "declined", "completed"],
+      default: "pending",
+    },
+
+    userName: {
+      type: String,
+      default: "Student",
     },
   },
   {
@@ -55,9 +77,4 @@ const bookingSchema = new mongoose.Schema(
   }
 );
 
-const Booking = mongoose.model(
-  "Booking",
-  bookingSchema
-);
-
-export default Booking;
+module.exports = mongoose.model("Booking", bookingSchema);
