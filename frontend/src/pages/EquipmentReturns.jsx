@@ -30,7 +30,7 @@ export default function EquipmentReturns() {
       setLoading(true);
 
       const response = await fetch(
-        "hhttps://campusflow-s065.onrender.com"
+        " http://localhost:5000"
       );
 
       const data = await response.json();
@@ -93,7 +93,7 @@ export default function EquipmentReturns() {
 
       const response = await fetch(
 
-        `https://campusflow-s065.onrender.com/${bookingId}/items/${itemIndex}/return`,
+        ` http://localhost:5000/${bookingId}/items/${itemIndex}/return`,
 
         {
           method: "PUT",

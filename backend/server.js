@@ -12,6 +12,7 @@ const app = express();
 // ==========================================
 
 app.use(cors());
+
 app.use(express.json());
 
 // ==========================================
@@ -119,7 +120,7 @@ const Booking = mongoose.model(
 );
 
 // ==========================================
-// TEST ROUTE
+// HOME ROUTE
 // ==========================================
 
 app.get("/", (req, res) => {
@@ -145,20 +146,21 @@ app.get("/api/test-db", async (req, res) => {
 
   } catch (error) {
 
+    console.error("❌ Database Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 });
 
 // ==========================================
 // GET ALL BOOKINGS
+// ADMIN USE
 // ==========================================
 
 app.get("/api/bookings", async (req, res) => {
-
   try {
 
     const bookings = await Booking.find()
@@ -185,40 +187,36 @@ app.get("/api/bookings", async (req, res) => {
       success: false,
       message: "Unable to fetch bookings",
     });
-
   }
-
 });
 
 // ==========================================
 // CREATE BOOKING
+// STUDENT USE
 // ==========================================
 
 app.post("/api/bookings", async (req, res) => {
 
   try {
 
-    console.log("📩 Booking Request Received:");
+    console.log("\n📩 BOOKING REQUEST RECEIVED");
     console.log(req.body);
 
     const bookingData = req.body;
 
-    // ======================================
     // VALIDATION
-    // ======================================
 
     if (!bookingData.resource) {
+
+      console.log("❌ Resource missing");
 
       return res.status(400).json({
         success: false,
         message: "Resource is required",
       });
-
     }
 
-    // ======================================
     // CREATE BOOKING
-    // ======================================
 
     const newBooking = await Booking.create({
 
@@ -240,20 +238,13 @@ app.post("/api/bookings", async (req, res) => {
         bookingData.purpose || "",
 
       capacity:
-        bookingData.capacity || 0,
+        Number(bookingData.capacity) || 0,
 
       facilities:
         bookingData.facilities || [],
 
       additionalItems:
-        bookingData.additionalItems?.map(
-          (item) => ({
-            name: item.name,
-            quantity: item.quantity || 1,
-            returned: false,
-            returnedAt: null,
-          })
-        ) || [],
+        bookingData.additionalItems || [],
 
       returnDeadline:
         bookingData.returnDeadline ||
@@ -263,63 +254,43 @@ app.post("/api/bookings", async (req, res) => {
         bookingData.userName || "Student",
 
       status: "pending",
-
     });
 
-    console.log(
-      "✅ BOOKING SAVED TO MONGODB"
-    );
-
-    console.log(
-      "Booking ID:",
-      newBooking._id
-    );
-
-    // ======================================
-    // RESPONSE
-    // ======================================
+    console.log("\n✅ BOOKING SAVED SUCCESSFULLY");
+    console.log("🆔 Booking ID:", newBooking._id);
+    console.log("📍 Resource:", newBooking.resource);
+    console.log("👤 User:", newBooking.userName);
+    console.log("📌 Status:", newBooking.status);
+    console.log("-----------------------------------");
 
     res.status(201).json({
-
       success: true,
-
-      message:
-        "Booking request sent successfully",
-
+      message: "Booking request sent successfully",
       booking: newBooking,
-
     });
 
   } catch (error) {
 
     console.error(
-      "❌ BOOKING ERROR:",
+      "\n❌ BOOKING ERROR:",
       error
     );
 
     res.status(500).json({
-
       success: false,
-
-      message:
-        "Unable to create booking",
-
+      message: "Unable to create booking",
       error: error.message,
-
     });
-
   }
-
 });
 
 // ==========================================
 // UPDATE BOOKING STATUS
-// APPROVE / REJECT
+// ADMIN APPROVE / REJECT
 // ==========================================
 
 app.put(
   "/api/bookings/:bookingId/status",
-
   async (req, res) => {
 
     try {
@@ -328,28 +299,16 @@ app.put(
 
       const { status } = req.body;
 
-      // ====================================
-      // VALIDATE STATUS
-      // ====================================
-
       if (
         !["approved", "rejected"].includes(status)
       ) {
 
         return res.status(400).json({
-
           success: false,
-
           message:
             "Status must be approved or rejected",
-
         });
-
       }
-
-      // ====================================
-      // UPDATE BOOKING
-      // ====================================
 
       const booking =
         await Booking.findByIdAndUpdate(
@@ -368,55 +327,39 @@ app.put(
           {
             new: true,
           }
-
         );
 
       if (!booking) {
 
         return res.status(404).json({
-
           success: false,
-
-          message:
-            "Booking not found",
-
+          message: "Booking not found",
         });
-
       }
 
       console.log(
-        `✅ Booking ${bookingId} ${status}`
+        `✅ Booking ${bookingId} → ${status}`
       );
 
       res.json({
-
         success: true,
-
         message:
           `Booking ${status} successfully`,
-
         booking,
-
       });
 
     } catch (error) {
 
       console.error(
-        "❌ Update Booking Error:",
+        "❌ Status Update Error:",
         error
       );
 
       res.status(500).json({
-
         success: false,
-
-        message:
-          "Unable to update booking",
-
+        message: "Unable to update booking",
       });
-
     }
-
   }
 );
 
@@ -426,7 +369,6 @@ app.put(
 
 app.put(
   "/api/bookings/:bookingId/items/:itemIndex/return",
-
   async (req, res) => {
 
     try {
@@ -440,14 +382,9 @@ app.put(
       if (!booking) {
 
         return res.status(404).json({
-
           success: false,
-
-          message:
-            "Booking not found",
-
+          message: "Booking not found",
         });
-
       }
 
       const item =
@@ -458,19 +395,10 @@ app.put(
       if (!item) {
 
         return res.status(404).json({
-
           success: false,
-
-          message:
-            "Equipment not found",
-
+          message: "Equipment not found",
         });
-
       }
-
-      // ====================================
-      // UPDATE EQUIPMENT
-      // ====================================
 
       item.returned = true;
 
@@ -483,14 +411,10 @@ app.put(
       );
 
       res.json({
-
         success: true,
-
         message:
-          "Equipment marked as returned successfully",
-
+          "Equipment marked as returned",
         booking,
-
       });
 
     } catch (error) {
@@ -501,22 +425,17 @@ app.put(
       );
 
       res.status(500).json({
-
         success: false,
-
         message:
           "Unable to mark equipment as returned",
-
       });
-
     }
-
   }
 );
 
 // ==========================================
 // DELETE ALL BOOKINGS
-// TEMPORARY DEVELOPMENT ROUTE
+// DEVELOPMENT ONLY
 // ==========================================
 
 app.delete("/api/bookings", async (req, res) => {
@@ -525,32 +444,26 @@ app.delete("/api/bookings", async (req, res) => {
 
     await Booking.deleteMany({});
 
+    console.log("🗑️ All bookings deleted");
+
     res.json({
-
       success: true,
-
       message:
         "All bookings deleted successfully",
-
     });
 
   } catch (error) {
 
     res.status(500).json({
-
       success: false,
-
       message:
         "Unable to delete bookings",
-
     });
-
   }
-
 });
 
 // ==========================================
-// MONGODB CONNECTION + START SERVER
+// START SERVER
 // ==========================================
 
 const PORT = process.env.PORT || 5000;
@@ -577,6 +490,9 @@ const startServer = async () => {
         `📍 http://localhost:${PORT}`
       );
 
+      console.log(
+        "📩 Booking API: POST /api/bookings"
+      );
     });
 
   } catch (error) {
@@ -587,9 +503,7 @@ const startServer = async () => {
     );
 
     process.exit(1);
-
   }
-
 };
 
 startServer();

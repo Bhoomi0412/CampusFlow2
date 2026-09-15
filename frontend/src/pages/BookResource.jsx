@@ -10,6 +10,8 @@ import {
   Wifi,
   Wind,
   Mic,
+  Speaker,
+  Laptop,
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
@@ -24,75 +26,220 @@ export default function BookResource() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const selectedVenue =
-    location.state?.venue || "Seminar Hall A";
-
   const [loading, setLoading] = useState(false);
-
-  const [showConfirmation, setShowConfirmation] =
-    useState(false);
-
-  const [requestSent, setRequestSent] =
-    useState(false);
-
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const [error, setError] = useState("");
 
   // ==========================================
-  // BOOKING DATA
+  // GET DATA FROM VENUE FINDER / MATCH RESULT
+  // ==========================================
+
+  const pageData = location.state || {};
+
+  const formData =
+    pageData.formData ||
+    pageData.requirements ||
+    pageData;
+
+  const selectedVenue =
+    pageData.venue ||
+    pageData.resource ||
+    formData.venue ||
+    formData.resource ||
+    "Seminar Hall A";
+
+  // ==========================================
+  // NORMALIZE EQUIPMENT DATA
+  // ==========================================
+
+  const rawEquipment =
+    formData.equipment ||
+    formData.additionalItems ||
+    [];
+
+  const normalizedEquipment = rawEquipment.map((item) => {
+    if (typeof item === "object") {
+      return {
+        name: item.name || "Equipment",
+        quantity: Number(item.quantity) || 1,
+        returned: false,
+        returnedAt: null,
+      };
+    }
+
+    return {
+      name: item,
+      quantity: 1,
+      returned: false,
+      returnedAt: null,
+    };
+  });
+
+  // ==========================================
+  // RETURN DEADLINE
+  // ==========================================
+
+  const calculateReturnDeadline = (endTime) => {
+    if (!endTime) {
+      return "Within 2 hours after the event ends";
+    }
+
+    try {
+      const [hours, minutes] = endTime
+        .split(":")
+        .map(Number);
+
+      if (
+        Number.isNaN(hours) ||
+        Number.isNaN(minutes)
+      ) {
+        return "Within 2 hours after the event ends";
+      }
+
+      const totalMinutes =
+        hours * 60 + minutes + 120;
+
+      const finalHours =
+        Math.floor(totalMinutes / 60) % 24;
+
+      const finalMinutes =
+        totalMinutes % 60;
+
+      const period =
+        finalHours >= 12 ? "PM" : "AM";
+
+      const displayHours =
+        finalHours % 12 || 12;
+
+      return `Before ${displayHours}:${String(
+        finalMinutes
+      ).padStart(2, "0")} ${period}`;
+    } catch {
+      return "Within 2 hours after the event ends";
+    }
+  };
+
+  // ==========================================
+  // GET USER NAME
+  // ==========================================
+
+  const getUserName = () => {
+    try {
+      const storedUser =
+        localStorage.getItem("campusflowUser");
+
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+
+        return (
+          user?.name ||
+          user?.fullName ||
+          user?.username ||
+          "Student"
+        );
+      }
+    } catch (err) {
+      console.log("Unable to read user:", err);
+    }
+
+    return (
+      localStorage.getItem("userName") ||
+      "Student"
+    );
+  };
+
+  // ==========================================
+  // FINAL BOOKING DATA
   // ==========================================
 
   const bookingData = {
     resource: selectedVenue,
 
-    location: "Academic Block A",
+    location:
+      pageData.location ||
+      formData.location ||
+      "Academic Block A",
 
-    date: "2026-09-15",
+    date: formData.date || "",
 
-    time: "10:00 - 12:00",
+    startTime: formData.startTime || "",
 
-    startTime: "10:00",
+    endTime: formData.endTime || "",
 
-    endTime: "12:00",
+    purpose:
+      formData.purpose ||
+      "College Event",
 
-    purpose: "College Event",
+    capacity: Number(
+      formData.people ||
+      formData.capacity ||
+      0
+    ),
 
-    capacity: 120,
+    facilities:
+      Array.isArray(formData.facilities)
+        ? formData.facilities
+        : [],
 
-    facilities: [
-      "Projector",
-      "WiFi",
-      "Air Conditioning",
-    ],
-
-    equipment: [
-      "Microphone x2",
-      "Speaker x1",
-    ],
-
-    additionalItems: [
-      {
-        name: "Microphone",
-        quantity: 2,
-        returned: false,
-      },
-      {
-        name: "Speaker",
-        quantity: 1,
-        returned: false,
-      },
-    ],
+    additionalItems:
+      normalizedEquipment,
 
     returnDeadline:
-      "Within 2 hours after the event ends",
+      calculateReturnDeadline(
+        formData.endTime
+      ),
 
-    userName: "Student",
+    userName: getUserName(),
 
-    // Backend MongoDB lowercase status use karega
     status: "pending",
   };
 
   // ==========================================
-  // SEND BOOKING REQUEST TO MONGODB
+  // EQUIPMENT ICON
+  // ==========================================
+
+  const getEquipmentIcon = (name = "") => {
+    const itemName =
+      name.toLowerCase();
+
+    if (itemName.includes("microphone")) {
+      return <Mic size={21} />;
+    }
+
+    if (itemName.includes("speaker")) {
+      return <Speaker size={21} />;
+    }
+
+    if (itemName.includes("laptop")) {
+      return <Laptop size={21} />;
+    }
+
+    return <Mic size={21} />;
+  };
+
+  // ==========================================
+  // FACILITY ICON
+  // ==========================================
+
+  const getFacilityIcon = (facility) => {
+    if (facility === "Projector") {
+      return <Monitor size={17} />;
+    }
+
+    if (facility === "WiFi") {
+      return <Wifi size={17} />;
+    }
+
+    if (facility === "Air Conditioning") {
+      return <Wind size={17} />;
+    }
+
+    return <CheckCircle2 size={17} />;
+  };
+
+  // ==========================================
+  // SEND BOOKING REQUEST
   // ==========================================
 
   const sendBookingRequest = async () => {
@@ -106,7 +253,7 @@ export default function BookResource() {
       );
 
       const response = await fetch(
-        "https://campusflow-s065.onrender.com",
+        "http://localhost:5000/api/bookings",
         {
           method: "POST",
 
@@ -118,37 +265,70 @@ export default function BookResource() {
         }
       );
 
-      const data = await response.json();
+      // ========================================
+      // SAFE RESPONSE HANDLING
+      // ========================================
+
+      const contentType =
+        response.headers.get(
+          "content-type"
+        ) || "";
+
+      let data;
+
+      if (
+        contentType.includes(
+          "application/json"
+        )
+      ) {
+        data = await response.json();
+      } else {
+        const text =
+          await response.text();
+
+        console.error(
+          "Backend returned non-JSON:",
+          text
+        );
+
+        throw new Error(
+          `Server returned an invalid response (${response.status}). Make sure backend is running on http://localhost:5000`
+        );
+      }
 
       console.log(
         "Backend response:",
         data
       );
 
-      // ======================================
-      // ERROR
-      // ======================================
+      // ========================================
+      // CHECK RESPONSE
+      // ========================================
 
-      if (!response.ok || !data.success) {
+      if (
+        !response.ok ||
+        !data.success
+      ) {
         throw new Error(
           data.message ||
             "Unable to send booking request."
         );
       }
 
-      // ======================================
-      // SUCCESS
-      // ======================================
-
       console.log(
-        "Booking saved in MongoDB:",
+        "Booking saved successfully:",
         data.booking
       );
 
-      // Optional localStorage backup
+      // ========================================
+      // LOCAL STORAGE BACKUP
+      // ========================================
+
       const existingBookings =
         JSON.parse(
-          localStorage.getItem("campusBookings")
+          localStorage.getItem(
+            "campusBookings"
+          )
         ) || [];
 
       localStorage.setItem(
@@ -159,21 +339,24 @@ export default function BookResource() {
         ])
       );
 
-      setShowConfirmation(false);
+      // ========================================
+      // SUCCESS
+      // ========================================
 
+      setShowConfirmation(false);
       setRequestSent(true);
 
-    } catch (error) {
+    } catch (err) {
       console.error(
         "Booking request error:",
-        error
+        err
       );
 
       setShowConfirmation(false);
 
       setError(
-        error.message ||
-          "Backend connection failed. Please check that the backend server is running."
+        err.message ||
+          "Backend connection failed."
       );
 
     } finally {
@@ -187,15 +370,17 @@ export default function BookResource() {
 
   const goToDashboard = () => {
     setRequestSent(false);
-
     navigate("/dashboard");
   };
 
   const goToMyBookings = () => {
     setRequestSent(false);
-
     navigate("/my-bookings");
   };
+
+  // ==========================================
+  // UI
+  // ==========================================
 
   return (
     <div className="app-layout">
@@ -209,18 +394,18 @@ export default function BookResource() {
           <div>
 
             <div className="booking-kicker">
-
               <Sparkles size={16} />
-
               BOOKING CONFIRMATION
-
             </div>
 
-            <h1>Review Your Booking</h1>
+            <h1>
+              Review Your Booking
+            </h1>
 
             <p>
-              Review all your selected resource details before
-              sending your booking request.
+              Review all your selected resource
+              details before sending your
+              booking request.
             </p>
 
           </div>
@@ -231,16 +416,19 @@ export default function BookResource() {
 
             <div>
 
-              <span>Booking Status</span>
+              <span>
+                Booking Status
+              </span>
 
-              <strong>Ready to Request</strong>
+              <strong>
+                Ready to Request
+              </strong>
 
             </div>
 
           </div>
 
         </section>
-
 
         {/* ================= ERROR ================= */}
 
@@ -256,13 +444,17 @@ export default function BookResource() {
                 Booking Request Could Not Be Sent
               </strong>
 
-              <p>{error}</p>
+              <p>
+                {error}
+              </p>
 
             </div>
 
             <button
               className="error-close-btn"
-              onClick={() => setError("")}
+              onClick={() =>
+                setError("")
+              }
             >
               <X size={18} />
             </button>
@@ -271,16 +463,13 @@ export default function BookResource() {
 
         )}
 
-
         {/* ================= MAIN CARD ================= */}
 
         <div className="booking-review-card">
 
-
-          {/* LEFT SIDE */}
+          {/* ================= LEFT SIDE ================= */}
 
           <div className="booking-review-main">
-
 
             {/* RESOURCE TITLE */}
 
@@ -308,18 +497,19 @@ export default function BookResource() {
 
             </div>
 
-
             <div className="booking-divider"></div>
 
-
-            {/* BOOKING DETAILS */}
+            {/* ================= BOOKING DETAILS ================= */}
 
             <section className="booking-section">
 
-              <h3>Booking Details</h3>
+              <h3>
+                Booking Details
+              </h3>
 
               <div className="booking-detail-grid">
 
+                {/* DATE */}
 
                 <div className="booking-detail-box">
 
@@ -329,16 +519,20 @@ export default function BookResource() {
 
                   <div>
 
-                    <span>Date</span>
+                    <span>
+                      Date
+                    </span>
 
                     <strong>
-                      {bookingData.date}
+                      {bookingData.date ||
+                        "Not selected"}
                     </strong>
 
                   </div>
 
                 </div>
 
+                {/* TIME */}
 
                 <div className="booking-detail-box">
 
@@ -348,18 +542,25 @@ export default function BookResource() {
 
                   <div>
 
-                    <span>Time</span>
+                    <span>
+                      Time
+                    </span>
 
                     <strong>
-                      {bookingData.startTime}
+                      {bookingData.startTime ||
+                        "--:--"}
+
                       {" - "}
-                      {bookingData.endTime}
+
+                      {bookingData.endTime ||
+                        "--:--"}
                     </strong>
 
                   </div>
 
                 </div>
 
+                {/* PEOPLE */}
 
                 <div className="booking-detail-box">
 
@@ -369,16 +570,21 @@ export default function BookResource() {
 
                   <div>
 
-                    <span>Expected Capacity</span>
+                    <span>
+                      Expected Capacity
+                    </span>
 
                     <strong>
-                      {bookingData.capacity} People
+                      {bookingData.capacity ||
+                        0}{" "}
+                      People
                     </strong>
 
                   </div>
 
                 </div>
 
+                {/* LOCATION */}
 
                 <div className="booking-detail-box">
 
@@ -388,7 +594,9 @@ export default function BookResource() {
 
                   <div>
 
-                    <span>Location</span>
+                    <span>
+                      Location
+                    </span>
 
                     <strong>
                       {bookingData.location}
@@ -402,145 +610,151 @@ export default function BookResource() {
 
             </section>
 
+            {/* ================= FACILITIES ================= */}
 
-            {/* REQUIRED FACILITIES */}
+            {bookingData.facilities.length > 0 && (
 
-            <section className="booking-section">
+              <section className="booking-section">
 
-              <h3>Required Facilities</h3>
+                <h3>
+                  Required Facilities
+                </h3>
 
-              <div className="booking-facilities">
+                <div className="booking-facilities">
 
-                {bookingData.facilities.map(
-                  (facility, index) => (
+                  {bookingData.facilities.map(
+                    (facility, index) => (
 
-                    <div
-                      className="booking-facility"
-                      key={index}
-                    >
+                      <div
+                        className="booking-facility"
+                        key={index}
+                      >
 
-                      {facility === "Projector" && (
-                        <Monitor size={17} />
-                      )}
-
-                      {facility === "WiFi" && (
-                        <Wifi size={17} />
-                      )}
-
-                      {facility === "Air Conditioning" && (
-                        <Wind size={17} />
-                      )}
-
-                      <span>
-                        {facility}
-                      </span>
-
-                    </div>
-
-                  )
-                )}
-
-              </div>
-
-            </section>
-
-
-            {/* ADDITIONAL EQUIPMENT */}
-
-            <section className="additional-section">
-
-              <div className="additional-heading">
-
-                <div>
-
-                  <h3>
-                    Additional Equipment
-                  </h3>
-
-                  <p>
-                    These items must be returned after
-                    your event.
-                  </p>
-
-                </div>
-
-                <span className="return-required-badge">
-                  Return Required
-                </span>
-
-              </div>
-
-
-              <div className="additional-items-list">
-
-                {bookingData.additionalItems.map(
-                  (item, index) => (
-
-                    <div
-                      className="additional-item-card"
-                      key={index}
-                    >
-
-                      <div className="additional-item-icon">
-                        <Mic size={21} />
-                      </div>
-
-                      <div className="additional-item-info">
-
-                        <strong>
-                          {item.name}
-                        </strong>
+                        {getFacilityIcon(
+                          facility
+                        )}
 
                         <span>
-                          Quantity: {item.quantity}
+                          {facility}
                         </span>
 
                       </div>
 
-                      <div className="item-return-status">
-                        Return After Event
+                    )
+                  )}
+
+                </div>
+
+              </section>
+
+            )}
+
+            {/* ================= EQUIPMENT ================= */}
+
+            {bookingData.additionalItems.length > 0 && (
+
+              <section className="additional-section">
+
+                <div className="additional-heading">
+
+                  <div>
+
+                    <h3>
+                      Additional Equipment
+                    </h3>
+
+                    <p>
+                      These items must be
+                      returned after your event.
+                    </p>
+
+                  </div>
+
+                  <span className="return-required-badge">
+                    Return Required
+                  </span>
+
+                </div>
+
+                <div className="additional-items-list">
+
+                  {bookingData.additionalItems.map(
+                    (item, index) => (
+
+                      <div
+                        className="additional-item-card"
+                        key={index}
+                      >
+
+                        <div className="additional-item-icon">
+                          {getEquipmentIcon(
+                            item.name
+                          )}
+                        </div>
+
+                        <div className="additional-item-info">
+
+                          <strong>
+                            {item.name}
+                          </strong>
+
+                          <span>
+                            Quantity:{" "}
+                            {item.quantity}
+                          </span>
+
+                        </div>
+
+                        <div className="item-return-status">
+                          Return After Event
+                        </div>
+
                       </div>
 
-                    </div>
+                    )
+                  )}
 
-                  )
-                )}
+                </div>
+
+              </section>
+
+            )}
+
+            {/* ================= RETURN REMINDER ================= */}
+
+            {bookingData.additionalItems.length > 0 && (
+
+              <div className="return-reminder-box">
+
+                <div className="return-reminder-icon">
+                  <Clock size={22} />
+                </div>
+
+                <div>
+
+                  <h4>
+                    Equipment Return Reminder
+                  </h4>
+
+                  <p>
+                    Return all borrowed equipment
+                    within 2 hours after your
+                    event ends.
+                  </p>
+
+                  <span className="fine-warning">
+                    ⚠ If equipment is not returned
+                    before the deadline, a fine may
+                    be applied.
+                  </span>
+
+                </div>
 
               </div>
 
-            </section>
-
-
-            {/* RETURN REMINDER */}
-
-            <div className="return-reminder-box">
-
-              <div className="return-reminder-icon">
-                <Clock size={22} />
-              </div>
-
-              <div>
-
-                <h4>
-                  Equipment Return Reminder
-                </h4>
-
-                <p>
-                  Return all borrowed equipment within
-                  2 hours after your event ends.
-                </p>
-
-                <span className="fine-warning">
-                  ⚠ If equipment is not returned before
-                  the deadline, a fine may be applied.
-                </span>
-
-              </div>
-
-            </div>
+            )}
 
           </div>
-
 
           {/* ================= RIGHT PANEL ================= */}
 
@@ -556,34 +770,31 @@ export default function BookResource() {
 
             </div>
 
-
             <span className="ready-label">
               EVERYTHING LOOKS GOOD
             </span>
-
 
             <h2>
               Ready to Send?
             </h2>
 
-
             <p>
-              Your booking request will be sent to the
-              administrator for approval.
+              Your booking request will be
+              sent to the administrator for
+              approval.
             </p>
-
 
             <div className="booking-security-note">
 
               <ShieldCheck size={20} />
 
               <span>
-                Your request will remain pending until
-                approved or declined by the administrator.
+                Your request will remain pending
+                until approved or declined by
+                the administrator.
               </span>
 
             </div>
-
 
             <button
               className="send-booking-request-btn"
@@ -591,14 +802,11 @@ export default function BookResource() {
                 setError("");
                 setShowConfirmation(true);
               }}
+              disabled={loading}
             >
-
               Send Booking Request
-
               <ArrowRight size={18} />
-
             </button>
-
 
             <Link
               to="/venue-finder"
@@ -610,7 +818,6 @@ export default function BookResource() {
           </aside>
 
         </div>
-
 
         {/* ================= CONFIRMATION MODAL ================= */}
 
@@ -632,7 +839,6 @@ export default function BookResource() {
                 <X size={20} />
               </button>
 
-
               <div className="confirmation-content">
 
                 <div className="confirmation-illustration">
@@ -648,10 +854,9 @@ export default function BookResource() {
                 </h2>
 
                 <p>
-                  Your request will be sent to the admin
-                  for approval.
+                  Your request will be sent
+                  to the admin for approval.
                 </p>
-
 
                 <div className="confirmation-summary">
 
@@ -660,19 +865,21 @@ export default function BookResource() {
                   </strong>
 
                   <p>
-                    {bookingData.date}
+                    {bookingData.date ||
+                      "Date not selected"}
 
                     {" • "}
 
-                    {bookingData.startTime}
+                    {bookingData.startTime ||
+                      "--:--"}
 
                     {" - "}
 
-                    {bookingData.endTime}
+                    {bookingData.endTime ||
+                      "--:--"}
                   </p>
 
                 </div>
-
 
                 <div className="confirmation-actions">
 
@@ -685,7 +892,6 @@ export default function BookResource() {
                   >
                     Cancel
                   </button>
-
 
                   <button
                     className="confirm-request-btn"
@@ -711,7 +917,6 @@ export default function BookResource() {
 
         )}
 
-
         {/* ================= SUCCESS MODAL ================= */}
 
         {requestSent && (
@@ -730,16 +935,13 @@ export default function BookResource() {
 
                 </div>
 
-
                 <div className="request-sent-tag">
                   REQUEST SENT SUCCESSFULLY
                 </div>
 
-
                 <h2>
                   Your Request Is Pending!
                 </h2>
-
 
                 <p className="success-message">
 
@@ -755,7 +957,6 @@ export default function BookResource() {
 
                 </p>
 
-
                 <div className="admin-process-box">
 
                   <Bell size={22} />
@@ -767,15 +968,16 @@ export default function BookResource() {
                     </h3>
 
                     <p>
-                      The administrator will review your
-                      request and approve or decline it.
-                      You can track the status in My Bookings.
+                      The administrator will
+                      review your request and
+                      approve or decline it.
+                      You can track the status
+                      in My Bookings.
                     </p>
 
                   </div>
 
                 </div>
-
 
                 <div className="request-current-status">
 
@@ -795,18 +997,13 @@ export default function BookResource() {
 
                 </div>
 
-
                 <button
                   className="success-done-btn"
                   onClick={goToDashboard}
                 >
-
                   Go to Dashboard
-
                   <ArrowRight size={18} />
-
                 </button>
-
 
                 <button
                   className="view-bookings-btn"

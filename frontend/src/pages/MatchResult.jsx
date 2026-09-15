@@ -11,11 +11,9 @@ import {
   Sparkles,
   Clock,
   ShieldCheck,
-  Mic,
-  Volume2,
-  AlertTriangle,
-  Package,
 } from "lucide-react";
+
+
 
 export default function MatchResult() {
   const facilities = [
@@ -24,20 +22,16 @@ export default function MatchResult() {
     { icon: <Wind size={18} />, text: "Air Conditioning" },
   ];
 
-  const additionalRequirements = [
-    { icon: <Mic size={18} />, text: "Wireless Microphone", quantity: "2" },
-    { icon: <Volume2 size={18} />, text: "Speaker System", quantity: "1" },
-  ];
-
   return (
     <div className="match-page">
 
+      {/* Decorative background */}
       <div className="match-blob blob-one"></div>
       <div className="match-blob blob-two"></div>
 
       <div className="match-container">
 
-        {/* HEADER */}
+        {/* TOP SECTION */}
         <div className="match-header">
 
           <div className="success-icon">
@@ -68,14 +62,9 @@ export default function MatchResult() {
           <div className="resource-main">
 
             <div className="resource-title-row">
-
               <div>
-                <span className="small-label">
-                  RECOMMENDED RESOURCE
-                </span>
-
+                <span className="small-label">RECOMMENDED RESOURCE</span>
                 <h2>Seminar Hall A</h2>
-
                 <p className="resource-subtitle">
                   Best match for your requirements
                 </p>
@@ -85,14 +74,13 @@ export default function MatchResult() {
                 <span>95%</span>
                 <small>Match</small>
               </div>
-
             </div>
 
 
             <div className="divider"></div>
 
 
-            {/* BASIC DETAILS */}
+            {/* DETAILS */}
             <div className="resource-details">
 
               <div className="detail-card">
@@ -121,53 +109,13 @@ export default function MatchResult() {
 
               <div className="detail-card">
                 <div className="detail-icon">
-                  <CheckCircle2 size={22} />
+                  <Calendar size={22} />
                 </div>
 
                 <div>
                   <span>Status</span>
-                  <strong className="available-text">
-                    Available
-                  </strong>
+                  <strong className="available-text">Available</strong>
                 </div>
-              </div>
-
-            </div>
-
-
-            {/* EVENT DETAILS */}
-            <div className="event-details-section">
-
-              <div className="section-heading">
-                <Calendar size={20} />
-                <h3>Booking Details</h3>
-              </div>
-
-              <div className="event-details-grid">
-
-                <div className="event-detail-box">
-                  <span>Event Date</span>
-                  <strong>15 September 2026</strong>
-                </div>
-
-                <div className="event-detail-box">
-                  <span>Event Timing</span>
-                  <strong>10:00 AM – 4:00 PM</strong>
-                </div>
-
-                <div className="event-detail-box return-deadline">
-                  <span>
-                    <Clock size={16} />
-                    Equipment Return Deadline
-                  </span>
-
-                  <strong>Before 6:00 PM</strong>
-
-                  <small>
-                    Return within 2 hours after the event ends
-                  </small>
-                </div>
-
               </div>
 
             </div>
@@ -192,56 +140,7 @@ export default function MatchResult() {
             </div>
 
 
-            {/* ADDITIONAL EQUIPMENT */}
-            <div className="additional-section">
-
-              <div className="section-heading">
-                <Package size={20} />
-                <h3>Additional Equipment Requested</h3>
-              </div>
-
-              <div className="equipment-list">
-
-                {additionalRequirements.map((item, index) => (
-
-                  <div className="equipment-item" key={index}>
-
-                    <div className="equipment-icon">
-                      {item.icon}
-                    </div>
-
-                    <span>{item.text}</span>
-
-                    <strong>× {item.quantity}</strong>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
-
-            {/* FINE WARNING */}
-            <div className="fine-warning">
-
-              <AlertTriangle size={24} />
-
-              <div>
-                <strong>Important Return Policy</strong>
-
-                <p>
-                  All additional equipment must be returned before
-                  <b> 6:00 PM</b>. Failure to return the equipment
-                  before the deadline may result in a fine.
-                </p>
-              </div>
-
-            </div>
-
-
-            {/* SMART INFO */}
+            {/* BOOKING INFO */}
             <div className="smart-info">
 
               <div className="smart-info-icon">
@@ -250,10 +149,9 @@ export default function MatchResult() {
 
               <div>
                 <strong>Conflict-Free Recommendation</strong>
-
                 <p>
                   This resource is currently available and matches
-                  your capacity, facilities and equipment requirements.
+                  your capacity and facility requirements.
                 </p>
               </div>
 
@@ -262,36 +160,25 @@ export default function MatchResult() {
           </div>
 
 
-          {/* RIGHT SIDE BOOKING PANEL */}
+          {/* RIGHT SIDE */}
           <div className="booking-panel">
 
             <div className="booking-panel-icon">
               <Clock size={28} />
             </div>
 
-            <span className="booking-status pending">
-              Awaiting Admin Approval
-            </span>
-
             <h3>Ready to Book?</h3>
 
             <p>
-              Submit your booking request. You will receive a
-              notification when the admin approves or declines it.
+              Secure this resource before another booking creates a conflict.
             </p>
 
-            <Link
-              to="/book-resource"
-              className="book-resource-btn"
-            >
+            <Link to="/book-resource" className="book-resource-btn">
               Book This Resource
               <ArrowRight size={20} />
             </Link>
 
-            <Link
-              to="/venue-finder"
-              className="another-resource-btn"
-            >
+            <Link to="/venue-finder" className="another-resource-btn">
               Find Another Resource
             </Link>
 
@@ -314,13 +201,8 @@ export default function MatchResult() {
           </div>
 
           <div className="result-feature">
-            <Package size={20} />
-            <span>Equipment Tracking</span>
-          </div>
-
-          <div className="result-feature">
-            <Clock size={20} />
-            <span>Return Reminders</span>
+            <Calendar size={20} />
+            <span>Easy Booking</span>
           </div>
 
         </div>
