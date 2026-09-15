@@ -253,7 +253,7 @@ export default function BookResource() {
       );
 
       const response = await fetch(
-        "http://localhost:5000/api/bookings",
+        "https://campusflow-backend2.onrender.com",
         {
           method: "POST",
 
@@ -292,7 +292,7 @@ export default function BookResource() {
         );
 
         throw new Error(
-          `Server returned an invalid response (${response.status}). Make sure backend is running on http://localhost:5000`
+          `Server returned an invalid response (${response.status}). Make sure backend is running on https://campusflow-backend2.onrender.com`
         );
       }
 

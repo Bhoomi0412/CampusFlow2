@@ -29,7 +29,7 @@ export default function BookingApprovals() {
       setError("");
 
       const response = await fetch(
-        " http://localhost:5000"
+        " https://campusflow-backend2.onrender.com"
       );
 
       const data = await response.json();
@@ -80,7 +80,7 @@ export default function BookingApprovals() {
       setError("");
 
       const response = await fetch(
-        ` http://localhost:5000/${bookingId}/status`,
+        ` https://campusflow-backend2.onrender.com/${bookingId}/status`,
         {
           method: "PUT",
 

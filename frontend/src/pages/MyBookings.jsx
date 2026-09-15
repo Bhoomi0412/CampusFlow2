@@ -27,7 +27,7 @@ export default function MyBookings() {
   const fetchBookings = async () => {
     try {
       const response = await fetch(
-        " http://localhost:5000"
+        " https://campusflow-backend2.onrender.com"
       );
 
       const data = await response.json();
